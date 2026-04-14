@@ -8,6 +8,9 @@ st.title("✨ LegendaAI")
 st.write("Crie legendas curtas e criativas para suas redes sociais!")
 
 # Estado da sessão
+if "historico" not in st.session_state:
+    st.session_state.historico = []
+
 if "resultado" not in st.session_state:
     st.session_state.resultado = None
 
@@ -54,11 +57,21 @@ if st.button("Gerar Legendas", use_container_width=True):
       with st.spinner("Gerando legendas..."):
         prompt = build_generate_prompt(tema, tom, quantidade, tamanho)
         resultado = gerar_legendas(prompt)
-
+        
         st.session_state.resultado = resultado
         st.session_state.prompt = prompt
         st.session_state.tom = tom
         st.session_state.legendas_encurtadas = {}
+
+        st.session_state.historico.append({
+            "tema": tema,
+            "tom": tom,
+            "quantidade": quantidade,
+            "tamanho": tamanho,
+            "legendas": resultado.get("legendas", []),
+            "hashtags": resultado.get("hashtags", [])
+        })
+
     except Exception as e:
       st.error(f"Erro ao gerar legendas: {e}") 
 
@@ -97,5 +110,25 @@ if st.session_state.resultado:
     st.subheader("Hashtags sugeridas:")
     st.markdown(", ".join(hashtags))
   
+# Exibição do histórico
+if st.session_state.historico:
+    with st.expander("Histórico"):
+      for item in reversed(st.session_state.historico):
+          st.markdown(
+              f"**Tema:** {item['tema']} | "
+              f"**Tom:** {item['tom']} | "
+              f"**Qtd:** {item['quantidade']} | "
+              f"**Máx. palavras:** {item['tamanho']}"
+          )
+
+          if item["legendas"]:
+              for legenda in item["legendas"]:
+                  st.markdown(f"- {legenda['mensagem']}")
+
+          if item["hashtags"]:
+              st.markdown("**Hashtags:** " + ", ".join(item["hashtags"]))
+
+          st.divider()
+
 #with st.expander("Prompt utilizado"):
 #  st.code(prompt, language="text")
