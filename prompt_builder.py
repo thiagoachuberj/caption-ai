@@ -23,7 +23,7 @@ def build_generate_prompt(tema, tom, quantidade, tamanho):
           - Não use explicações, apenas gere as frases
           - Evite clichês muito comuns
           - Seja criativo, mas mantenha coerência com o tema
-          - Gere exatamente 3 hashtags, mesmo que o tema seja mais específico ou genérico
+          - Gere exatamente 5 hashtags, mesmo que o tema seja mais específico ou genérico
         
         Formato de resposta:
           - Não escreva nenhum texto antes ou depois do JSON
@@ -35,7 +35,7 @@ def build_generate_prompt(tema, tom, quantidade, tamanho):
               {{ "mensagem": "frase 2" }},
               {{ "mensagem": "frase 3" }}
             ],
-            "hashtags": ["#hashtag1", "#hashtag2", "#hashtag3"]
+            "hashtags": ["#hashtag1", "#hashtag2", "#hashtag3", "#hashtag4", "#hashtag5"]
           }}"""
   
   user_context = f""" 

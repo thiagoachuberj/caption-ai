@@ -1,6 +1,7 @@
 import streamlit as st
 from prompt_builder import build_generate_prompt, build_shorten_prompt
 from llm_client import gerar_legendas, encurtar_legenda
+from copy_button import copy_button
 
 st.set_page_config(page_title="LegendaAI", page_icon="✨")
 
@@ -87,29 +88,57 @@ if st.session_state.resultado:
   else:
     for i, item in enumerate(resultado["legendas"]):
       legenda_original = item.get("mensagem", "")
-      st.markdown(f"- {legenda_original}")
 
-      if st.button("Deixar mais curta", key=f"shorten_{i}"):
-        try:
-          with st.spinner("Encurtando legenda..."):
-            prompt_shorten = build_shorten_prompt(legenda_original)
-            nova_legenda = encurtar_legenda(prompt_shorten)
+      with st.container(border=True):
+        col1, col2 = st.columns([5, 2])
+        with col1:
+          st.markdown(f"- {legenda_original}")
 
-            st.session_state.legendas_encurtadas[i] = nova_legenda.get("mensagem", "")
+        with col2:
+          copy_button(legenda_original, "📋")
 
-        except Exception as e:
-          st.error(f"Erro ao encurtar legenda: {e}")
+        #Legenda encurtada
+        if st.button("Deixar mais curta", key=f"shorten_{i}"):
+          try:
+            with st.spinner("Encurtando legenda..."):
+              prompt_shorten = build_shorten_prompt(legenda_original)
+              nova_legenda = encurtar_legenda(prompt_shorten)
 
-      if i in st.session_state.legendas_encurtadas:
-        st.markdown(f"**Versão mais curta:** {st.session_state.legendas_encurtadas[i]}")
+              st.session_state.legendas_encurtadas[i] = nova_legenda.get("mensagem", "")
 
+          except Exception as e:
+            st.error(f"Erro ao encurtar legenda: {e}")
+
+        if i in st.session_state.legendas_encurtadas:
+          legenda_curta = st.session_state.legendas_encurtadas[i]
+
+          col1, col2 = st.columns([5, 2])
+          with col1:
+            st.markdown(f"**Versão mais curta:** {legenda_curta}")  
+
+          with col2:
+            copy_button(legenda_curta, "📋")
+
+  # Exibição das hashtags
   hashtags = resultado.get("hashtags", [])
   if not hashtags:
     st.warning("Nenhuma hashtag foi gerada.")
   else:
     st.subheader("Hashtags sugeridas:")
-    st.markdown(", ".join(hashtags))
+    
+    cols_per_row = 3
 
+    for start in range(0, len(hashtags), cols_per_row):
+        row_items = hashtags[start:start + cols_per_row]
+        cols = st.columns(cols_per_row, gap="small")
+
+        for col, hashtag in zip(cols, row_items):
+            with col:
+                with st.container(border=True):
+                    st.markdown(f"**{hashtag}**")
+                    copy_button(hashtag, "📋 Copiar")
+
+st.write("")
 
 # Exibição do histórico como card
 if st.session_state.historico:
@@ -133,13 +162,6 @@ if st.session_state.historico:
             st.caption(
               f"Quantidade: {item['quantidade']} • Máx. palavras: {item['tamanho']}"
             )
-
-            #st.markdown(
-            #    f"**Tema:** {item['tema'].title()} \n"
-            #    f"**Tom:** {item['tom']} | "
-            #    f"**Qtd:** {item['quantidade']} | "
-            #    f"**Máx. palavras:** {item['tamanho']}"
-            #)
 
             if item["legendas"]:
                 st.markdown("**Legendas:**")
