@@ -109,26 +109,48 @@ if st.session_state.resultado:
   else:
     st.subheader("Hashtags sugeridas:")
     st.markdown(", ".join(hashtags))
-  
-# Exibição do histórico
+
+
+# Exibição do histórico como card
 if st.session_state.historico:
     with st.expander("Histórico"):
+
+      if st.button("Limpar histórico", use_container_width=True):
+          st.session_state.historico = []
+          st.success("Histórico limpo com sucesso!")
+          st.rerun()
+
       for item in reversed(st.session_state.historico):
-          st.markdown(
-              f"**Tema:** {item['tema']} | "
-              f"**Tom:** {item['tom']} | "
-              f"**Qtd:** {item['quantidade']} | "
-              f"**Máx. palavras:** {item['tamanho']}"
-          )
+          with st.container(border=True):
+            col1, col2 = st.columns([2, 1])
 
-          if item["legendas"]:
-              for legenda in item["legendas"]:
-                  st.markdown(f"- {legenda['mensagem']}")
+            with col1:
+              st.markdown(f"### {item['tema'].title()}")
 
-          if item["hashtags"]:
-              st.markdown("**Hashtags:** " + ", ".join(item["hashtags"]))
+            with col2:
+              st.caption(f"#### Tom: {item['tom']}")
+            
+            st.caption(
+              f"Quantidade: {item['quantidade']} • Máx. palavras: {item['tamanho']}"
+            )
 
-          st.divider()
+            #st.markdown(
+            #    f"**Tema:** {item['tema'].title()} \n"
+            #    f"**Tom:** {item['tom']} | "
+            #    f"**Qtd:** {item['quantidade']} | "
+            #    f"**Máx. palavras:** {item['tamanho']}"
+            #)
+
+            if item["legendas"]:
+                st.markdown("**Legendas:**")
+                for legenda in item["legendas"]:
+                    st.markdown(f"- {legenda['mensagem']}")
+
+            if item["hashtags"]:
+                st.markdown("**Hashtags:**")
+                st.markdown(", ".join(item["hashtags"]))
+
+            st.write("")
 
 #with st.expander("Prompt utilizado"):
 #  st.code(prompt, language="text")
