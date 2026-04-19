@@ -31,7 +31,13 @@ tema = st.text_input(
 
 tom = st.selectbox(
   "Tom",
-  ["romântico", "poético", "leve", "profundo", "engraçado", "inspirador"]
+  ["romântico", "poético", "leve", "profundo", "engraçado", "inspirador", "motivacional", "minimalista", "elegante",
+   "descontraído", "reflexivo", "profissional"]
+)
+
+plataforma = st.selectbox(
+  "Plataforma",
+  ["Instagram", "Facebook", "LinkedIn", "TikTok"]
 )
 
 quantidade = st.number_input(
@@ -56,7 +62,7 @@ if st.button("Gerar Legendas", use_container_width=True):
   else:
     try:
       with st.spinner("Gerando legendas..."):
-        prompt = build_generate_prompt(tema, tom, quantidade, tamanho)
+        prompt = build_generate_prompt(tema, tom, quantidade, tamanho, plataforma)
         resultado = gerar_legendas(prompt)
         
         st.session_state.resultado = resultado
@@ -67,6 +73,7 @@ if st.button("Gerar Legendas", use_container_width=True):
         st.session_state.historico.append({
             "tema": tema,
             "tom": tom,
+            "plataforma": plataforma,
             "quantidade": quantidade,
             "tamanho": tamanho,
             "legendas": resultado.get("legendas", []),
@@ -86,7 +93,7 @@ if st.session_state.resultado:
   if not legendas:
     st.warning("Nenhuma legenda foi gerada.")
   else:
-    for i, item in enumerate(resultado["legendas"]):
+    for i, item in enumerate(legendas):
       legenda_original = item.get("mensagem", "")
 
       with st.container(border=True):
@@ -101,7 +108,7 @@ if st.session_state.resultado:
         if st.button("Deixar mais curta", key=f"shorten_{i}"):
           try:
             with st.spinner("Encurtando legenda..."):
-              prompt_shorten = build_shorten_prompt(legenda_original)
+              prompt_shorten = build_shorten_prompt(legenda_original, st.session_state.tom)
               nova_legenda = encurtar_legenda(prompt_shorten)
 
               st.session_state.legendas_encurtadas[i] = nova_legenda.get("mensagem", "")
@@ -158,6 +165,9 @@ if st.session_state.historico:
 
             with col2:
               st.caption(f"#### Tom: {item['tom']}")
+
+            if[item["plataforma"]]:
+              st.caption(f"Plataforma: {item['plataforma']}")
             
             st.caption(
               f"Quantidade: {item['quantidade']} • Máx. palavras: {item['tamanho']}"
